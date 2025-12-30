@@ -16,11 +16,27 @@ const fetchAvailability = async () =>
     try
     {
         const webhookUrl = import.meta.env.VITE_WEBHOOK_AVAILABILITY;
-        // Simulating fetch for now as the endpoint might not be live yet
-        // const response = await fetch(webhookUrl);
-        // const data = await response.json();
+        const response = await fetch(webhookUrl);
+        if (!response.ok) throw new Error('Error fetching availability');
 
-        // Mock data generator for next 7 days
+        const data = await response.json();
+
+        if (Array.isArray(data))
+        {
+            availableSlots.value = data;
+        } else if (data && typeof data === 'object' && data.date)
+        {
+            // Si n8n devuelve un solo objeto, lo tratamos como un array de un elemento
+            availableSlots.value = [data];
+        } else
+        {
+            console.warn("El webhook no devolvió un formato reconocido. Respuesta:", data);
+            throw new Error("Invalid format");
+        }
+    } catch (e)
+    {
+        console.error("Error fetching real availability, using fallback mock", e);
+        // Mock data generator for next 7 days as fallback
         const dates = [];
         const today = new Date();
         for (let i = 1; i <= 7; i++)
@@ -28,7 +44,7 @@ const fetchAvailability = async () =>
             const d = new Date(today);
             d.setDate(today.getDate() + i);
             if (d.getDay() !== 0 && d.getDay() !== 6)
-            { // Skip weekends
+            {
                 dates.push({
                     date: d.toISOString().split('T')[0],
                     display: d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }),
@@ -37,9 +53,6 @@ const fetchAvailability = async () =>
             }
         }
         availableSlots.value = dates;
-    } catch (e)
-    {
-        console.error("Error fetching availability", e);
     } finally
     {
         loading.value = false;
