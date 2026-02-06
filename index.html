@@ -9,5 +9,21 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
+    <script>
+      window.chatwootSettings = {"position":"right","type":"standard","launcherTitle":"Chatea con nosotros"};
+      (function(d,t) {
+        var BASE_URL="https://vertex.trememote.com.ar";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+          window.chatwootSDK.run({
+            websiteToken: 'J5gtXhkL8tvLUmBG3kwtcR1m',
+            baseUrl: BASE_URL
+          })
+        }
+      })(document,"script");
+    </script>
   </body>
 </html>
